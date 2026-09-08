@@ -1,0 +1,16 @@
+version: 1
+
+sources:
+  - name: olist_raw
+    description: Client CSVs loaded into PostgreSQL as received
+    schema: raw
+    tables:
+      - name: customers
+      - name: geolocation
+      - name: order_items
+      - name: order_payments
+      - name: order_reviews
+      - name: orders
+      - name: products
+      - name: sellers
+      - name: category_translation

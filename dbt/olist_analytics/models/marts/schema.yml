@@ -1,0 +1,99 @@
+version: 2
+
+models:
+  - name: dim_date
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
+
+  - name: dim_customers
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+
+  - name: dim_products
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+      - name: product_category_english
+        data_tests: [not_null]   # 'uncategorized' fallback guarantees this
+
+  - name: dim_sellers
+    columns:
+      - name: seller_id
+        data_tests: [unique, not_null]
+
+  - name: fct_orders
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+      - name: purchase_date
+        data_tests: [not_null]
+      - name: order_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['created','approved','invoiced','processing','shipped','delivered','canceled','unavailable']
+      - name: primary_payment_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['credit_card','boleto','voucher','debit_card','not_defined']
+
+  - name: fct_order_items
+    columns:
+      - name: order_item_key
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+      - name: seller_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_sellers')
+                field: seller_id
+
+  - name: fct_reviews
+    columns:
+      - name: review_id
+        data_tests: [unique, not_null]
+
+  - name: mart_sales
+    description: >
+      Grain: one row per (month_start, product_category). Grain uniqueness is
+      enforced by tests/assert_mart_sales_grain_is_unique.sql.
+
+  - name: mart_customer_metrics
+    columns:
+      - name: customer_unique_id
+        data_tests: [unique, not_null]
+
+  - name: mart_seller_performance
+    columns:
+      - name: seller_id
+        data_tests: [unique, not_null]
+
+  - name: mart_delivery_performance
+    columns:
+      - name: month_start
+        data_tests: [not_null]
+      - name: customer_state
+        data_tests: [not_null]

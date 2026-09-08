@@ -1,0 +1,3 @@
+dbt/logs
+dbt/olist_analytics/logs
+dbt/olist_analytics/target/
